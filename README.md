@@ -27,8 +27,8 @@ No installation needed.
 2. Open `index.html` in any modern browser.
 
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
+git clone https://github.com/aryanaditya024-max/tic_tac_toe_mini_project.git
+cd tic_tac_toe_mini_project
 # then open index.html
 ```
 
