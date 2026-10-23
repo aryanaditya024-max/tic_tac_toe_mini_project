@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A modern, neon-styled Tic-Tac-Toe game with 2-player and AI modes, sound effects, and confetti.">
+  <title>Tic-Tac-Toe • Neon Edition</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%8C%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-glow">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+  </div>
+
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <main class="game-container">
+    <!-- Top Header -->
+    <header class="game-header">
+      <div class="header-top">
+        <h1 class="game-title">
+          <span class="mark-x-glow">TIC</span>
+          <span class="divider">•</span>
+          <span class="mark-o-glow">TAC</span>
+          <span class="divider">•</span>
+          <span class="mark-x-glow">TOE</span>
+        </h1>
+        <div class="header-actions">
+          <button id="historyToggleBtn" class="icon-btn" aria-label="View Match History" title="Match History">
+            <span class="history-icon">📜</span>
+            <span class="history-badge hidden" id="historyCountBadge">0</span>
+          </button>
+          <button id="soundToggle" class="icon-btn" aria-label="Toggle Sound" title="Toggle Sound">
+            <span class="sound-icon" id="soundIcon">🔊</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode & Difficulty Selectors -->
+      <div class="settings-bar">
+        <div class="mode-selector" role="radiogroup" aria-label="Game Mode">
+          <button class="mode-btn active" data-mode="pvp" id="modePvp" role="radio" aria-checked="true">
+            👥 2 Players
+          </button>
+          <button class="mode-btn" data-mode="pve" id="modePve" role="radio" aria-checked="false">
+            🤖 vs AI
+          </button>
+        </div>
+
+        <div class="difficulty-wrapper hidden" id="difficultyWrapper">
+          <label for="difficultySelect" class="sr-only">AI Difficulty</label>
+          <select id="difficultySelect" class="custom-select" aria-label="AI Difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard" selected>Unbeatable</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Turn Indicator -->
+    <section class="turn-section" aria-live="polite">
+      <div class="turn-badge" id="turnBadge">
+        <span class="turn-mark" id="turnMark">X</span>
+        <span class="turn-text" id="turnText">Player X's Turn</span>
+      </div>
+    </section>
+
+    <!-- Scoreboard -->
+    <section class="scoreboard" aria-label="Scoreboard">
+      <div class="score-card player-x-card" id="cardPlayerX">
+        <div class="score-label" id="labelPlayerX">PLAYER X</div>
+        <div class="score-value" id="scoreX">0</div>
+      </div>
+      <div class="score-card ties-card">
+        <div class="score-label">TIES</div>
+        <div class="score-value" id="scoreTies">0</div>
+      </div>
+      <div class="score-card player-o-card" id="cardPlayerO">
+        <div class="score-label" id="labelPlayerO">PLAYER O</div>
+        <div class="score-value" id="scoreO">0</div>
+      </div>
+    </section>
+
+    <!-- 3x3 Game Board -->
+    <section class="board-wrapper">
+      <div class="board" id="board" aria-label="Tic-Tac-Toe Board">
+        <!-- 9 Grid Cells -->
+        <button class="cell" data-index="0" aria-label="Row 1, Column 1"></button>
+        <button class="cell" data-index="1" aria-label="Row 1, Column 2"></button>
+        <button class="cell" data-index="2" aria-label="Row 1, Column 3"></button>
+        <button class="cell" data-index="3" aria-label="Row 2, Column 1"></button>
+        <button class="cell" data-index="4" aria-label="Row 2, Column 2"></button>
+        <button class="cell" data-index="5" aria-label="Row 2, Column 3"></button>
+        <button class="cell" data-index="6" aria-label="Row 3, Column 1"></button>
+        <button class="cell" data-index="7" aria-label="Row 3, Column 2"></button>
+        <button class="cell" data-index="8" aria-label="Row 3, Column 3"></button>
+
+        <!-- Strike Line for Winning 3-in-a-row -->
+        <div class="strike-line" id="strikeLine" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- Game Actions -->
+    <footer class="game-controls">
+      <button id="newRoundBtn" class="action-btn primary-btn">
+        <span class="btn-icon">🔄</span> Next Round
+      </button>
+      <button id="resetScoreBtn" class="action-btn secondary-btn">
+        <span class="btn-icon">⚡</span> Reset Score
+      </button>
+    </footer>
+
+    <div class="keyboard-hints">
+      <small>Tip: Use <kbd>Arrow Keys</kbd> to move, <kbd>Enter</kbd> / <kbd>Space</kbd> to play, <kbd>R</kbd> to restart round.</small>
+    </div>
+  </main>
+
+  <!-- Winner / Draw Dialog Modal -->
+  <dialog id="resultModal" class="result-modal" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="result-icon" id="resultIcon">🏆</div>
+      <h2 id="modalTitle" class="result-title">Player X Wins!</h2>
+      <p id="modalSubtitle" class="result-subtitle">Magnificent Victory</p>
+      <div class="modal-actions">
+        <button id="modalPlayAgainBtn" class="action-btn primary-btn">
+          Play Again
+        </button>
+        <button id="modalViewHistoryBtn" class="action-btn secondary-btn">
+          📜 View History
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Match History Modal Dialog -->
+  <dialog id="historyModal" class="history-modal" aria-labelledby="historyTitle">
+    <div class="history-content">
+      <div class="history-header">
+        <h2 id="historyTitle" class="history-title">📜 Match History</h2>
+        <button id="closeHistoryBtn" class="icon-btn close-btn" aria-label="Close History">✕</button>
+      </div>
+
+      <!-- Quick summary stats -->
+      <div class="history-stats" id="historyStats">
+        <div class="stat-pill stat-x"><span id="statX">0</span> X Wins</div>
+        <div class="stat-pill stat-tie"><span id="statTies">0</span> Draws</div>
+        <div class="stat-pill stat-o"><span id="statO">0</span> O Wins</div>
+      </div>
+
+      <!-- History list -->
+      <div class="history-list" id="historyList" role="feed" aria-label="Match records">
+        <!-- Dynamically populated via JS -->
+      </div>
+
+      <!-- Footer action -->
+      <div class="history-footer">
+        <button id="clearHistoryBtn" class="action-btn secondary-btn clear-btn">
+          <span>🗑️</span> Clear History
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
