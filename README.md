@@ -72,4 +72,4 @@ Made as a mini project
 
 ## License
 
-MIT — free to use and modify. _(Add a `LICENSE` file if you want this to be official.)_
+MIT — free to use and modify.
